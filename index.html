@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Picklers Year-End Party</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=Barlow:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1633; --lime:#C8DC4B; --lime2:#B8F53C; --green:#4A742D;
+  --ease:cubic-bezier(.16,1,.3,1); --pop:cubic-bezier(.34,1.56,.64,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--navy);color:#fff}
+html{scroll-snap-type:y mandatory}
+html.free{scroll-snap-type:none}
+body{font-family:'Barlow Condensed',Impact,'Arial Narrow',sans-serif;font-style:italic;font-weight:900;-webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
+button{font:inherit;color:inherit}
+
+/* ---------- scroll track + sticky stage ---------- */
+.track{position:relative;height:500vh;height:500svh}
+.snap{position:absolute;left:0;width:1px;height:100vh;height:100svh;scroll-snap-align:start;scroll-snap-stop:always;pointer-events:none}
+.snap.a{top:0}.snap.b{top:200vh;top:200svh}.snap.c{top:400vh;top:400svh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+canvas#bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.shade{position:absolute;left:0;right:0;pointer-events:none;transition:opacity .8s ease}
+.shade.top{top:0;height:40%;background:linear-gradient(to bottom,rgba(15,22,51,.72),rgba(15,22,51,0))}
+.shade.bot{bottom:0;height:44%;background:linear-gradient(to top,rgba(15,22,51,.85),rgba(15,22,51,0))}
+.stage.calm .shade{opacity:.35}
+
+/* ---------- sections ---------- */
+.sec{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:max(clamp(22px,5vh,60px),env(safe-area-inset-top)) 18px max(clamp(16px,3vh,40px),env(safe-area-inset-bottom));pointer-events:none}
+.sec.on{pointer-events:auto}
+.spacer{flex:1 1 auto;min-height:8px}
+.grp{display:flex;flex-direction:column;align-items:center;width:100%}
+
+/* reveal choreography: out fast, in staggered */
+.rv{opacity:0;transform:translate3d(0,34px,0) scale(.92);transition:opacity .25s ease,transform .3s ease;will-change:transform,opacity}
+.sec.on .rv{opacity:1;transform:translate3d(0,0,0) rotate(var(--r,0deg)) scale(1);
+  transition:opacity .45s ease,transform .75s var(--pop);transition-delay:calc(var(--i,0) * 90ms)}
+/* slap-in variant for banners & tickets */
+.rv.slap{transform:translate3d(0,46px,0) rotate(calc(var(--r,0deg) * -4)) scale(.8)}
+/* heading: punch in with italic skew */
+.rv.punch{transform:translate3d(-30px,0,0) skewX(-12deg) scale(1.08)}
+.sec.on .rv.punch{transition:opacity .35s ease,transform .6s var(--ease);transition-delay:calc(var(--i,0) * 90ms)}
+
+/* ---------- type ---------- */
+.stroke{color:#fff;-webkit-text-stroke:.1em var(--navy);paint-order:stroke fill;text-shadow:0 .1em 0 var(--navy);letter-spacing:.015em;text-transform:uppercase;line-height:1;margin:0}
+.h1{font-size:clamp(34px,4.3vw,62px)}
+.h2{font-size:clamp(40px,5vw,72px)}
+
+/* ---------- section 1 ---------- */
+.logo{width:min(440px,74vw);max-height:30vh;height:auto;object-fit:contain;display:block;margin-top:clamp(4px,1vh,10px);filter:drop-shadow(0 6px 0 rgba(15,22,51,.35))}
+.yep{font-size:clamp(28px,3.2vw,46px);letter-spacing:.08em;margin-top:-.15em}
+.sec.on .floaty{animation:float 4.5s ease-in-out 1.2s infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.tagline{--r:-2deg;background:#fff;color:var(--navy);border:3px solid var(--navy);border-radius:4px;box-shadow:0 5px 0 var(--navy);
+  padding:.32em 1.1em;font-weight:800;font-size:clamp(17px,1.6vw,23px);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+
+/* scroll cue */
+.cue{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;cursor:pointer;padding:12px 18px 2px;min-height:44px}
+.cue span{font-weight:800;font-size:clamp(13px,1.2vw,16px);letter-spacing:.24em;text-shadow:0 2px 0 var(--navy);padding-left:.24em}
+.cue .mouse{width:26px;height:42px}
+.cue .wheel{animation:wheel 1.8s ease-in-out infinite}
+@keyframes wheel{0%{transform:translateY(0);opacity:1}70%{transform:translateY(9px);opacity:0}100%{opacity:0}}
+.cue .chev{width:24px;height:24px;animation:bob 1.8s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+.cue:hover span{color:var(--lime2)}
+.cue:focus-visible{outline:3px solid var(--lime2);outline-offset:4px;border-radius:10px}
+
+/* ---------- section 2 ---------- */
+.days{font-size:clamp(120px,16vw,240px);color:var(--lime);-webkit-text-stroke:.05em var(--navy);paint-order:stroke fill;text-shadow:0 .05em 0 var(--navy);line-height:.82;letter-spacing:.04em;margin-top:.04em;font-variant-numeric:tabular-nums}
+.dl{--r:-2deg;background:var(--navy);border:3px solid var(--lime);border-radius:5px;box-shadow:0 6px 0 var(--lime);
+  font-weight:800;font-size:clamp(22px,2.4vw,34px);letter-spacing:.18em;padding:.12em .7em .12em .88em;text-transform:uppercase;margin-top:.15em}
+.tickets{display:flex;justify-content:center;align-items:center;gap:clamp(12px,1.6vw,24px);flex-wrap:wrap;max-width:1000px}
+.ticket{display:flex;align-items:stretch;background:#fff;color:var(--navy);border:4px solid var(--navy);border-radius:10px;box-shadow:0 8px 0 var(--navy);overflow:hidden;text-align:left}
+.ticket .stub{background:var(--lime);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:62px;flex:none;border-right:3px dashed var(--navy)}
+.ticket .stub svg{width:30px;height:30px}
+.ticket .stub b{font-size:28px;line-height:1}
+.ticket .body{padding:14px 22px 14px 18px;display:flex;flex-direction:column;justify-content:center}
+.ticket .k{color:var(--green);font-weight:800;font-size:20px;letter-spacing:.12em;line-height:1}
+.ticket .v{font-size:clamp(28px,2.4vw,34px);line-height:1;margin:.12em 0 .14em;text-transform:uppercase;white-space:nowrap}
+.ticket .s{font-family:Barlow,system-ui,sans-serif;font-style:normal;font-weight:600;font-size:15px;opacity:.75}
+.t1{--r:-2.5deg}.t2{--r:1.5deg}.t3{--r:-1.5deg}
+
+/* ---------- section 3 ---------- */
+.cta-wrap{position:relative;display:grid;place-items:center;padding:clamp(14px,1.6vw,22px) clamp(18px,2.4vw,34px)}
+.ring{position:absolute;pointer-events:none}
+.ring.r1{inset:0;border:3px dashed #fff;border-radius:34px;filter:drop-shadow(0 3px 0 var(--navy))}
+.ring.r2{inset:clamp(6px,1vw,14px) clamp(10px,1.6vw,22px);background:rgba(15,22,51,.45);border:3px solid var(--lime);border-radius:26px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.ring.pulse{inset:clamp(14px,1.6vw,22px) clamp(18px,2.4vw,34px);border:3px solid var(--lime2);border-radius:18px;opacity:0}
+.sec.on .ring.pulse{animation:pulse 2.2s ease-out 1.3s infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.1,1.4);opacity:0}}
+.cta{position:relative;display:inline-flex;align-items:center;gap:clamp(10px,1.4vw,20px);text-decoration:none;color:var(--navy);white-space:nowrap;
+  font-weight:900;font-size:clamp(25px,3.5vw,50px);letter-spacing:.03em;text-transform:uppercase;
+  padding:clamp(16px,2vw,36px) clamp(22px,4.4vw,64px);border-radius:18px;border:5px solid var(--navy);
+  background:linear-gradient(180deg,#DEF16B,#B8D13D);box-shadow:0 10px 0 var(--navy),0 0 36px rgba(200,220,75,.55);
+  transition:transform .2s var(--ease),box-shadow .2s ease,filter .2s ease}
+.cta:hover{transform:translateY(-3px);filter:brightness(1.05)}
+.cta:active{transform:translateY(6px);box-shadow:0 4px 0 var(--navy),0 0 26px rgba(200,220,75,.55)}
+.cta:focus-visible{outline:4px solid #fff;outline-offset:6px}
+.cta .pad{width:1.05em;height:1.05em;flex:none}
+.cta .arr{width:.7em;height:.7em;flex:none;animation:nudge 1.5s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+.rv.cta-in{transform:translate3d(0,60px,0) scale(.7)}
+
+/* ---------- section dots ---------- */
+.dots{position:fixed;right:max(12px,env(safe-area-inset-right));top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:4px;opacity:0;transition:opacity .6s ease}
+.dots.show{opacity:1}
+.dots button{display:flex;align-items:center;justify-content:flex-end;gap:10px;background:none;border:0;padding:8px 4px;cursor:pointer;min-height:36px}
+.dots span{font-weight:800;font-size:13px;letter-spacing:.14em;text-shadow:0 2px 0 var(--navy);opacity:0;transform:translateX(6px);transition:opacity .3s,transform .3s}
+.dots i{width:12px;height:12px;border-radius:50%;border:2.5px solid var(--navy);background:#fff;transition:all .35s var(--ease)}
+.dots button.on i{background:var(--lime);height:28px;border-radius:7px}
+.dots button:hover span,.dots button.on span{opacity:1;transform:none}
+.dots button:focus-visible{outline:3px solid var(--lime2);border-radius:8px}
+
+/* ---------- loader ---------- */
+.loader{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:radial-gradient(circle at 50% 40%,#1d2a63,var(--navy) 70%);transition:opacity .7s ease,visibility .7s}
+.loader.done{opacity:0;visibility:hidden}
+.loader img{width:min(360px,70vw);height:auto;animation:float 2.6s ease-in-out infinite}
+.loader .bar{width:min(260px,60vw);height:8px;border-radius:6px;background:rgba(255,255,255,.15);border:2px solid #fff;overflow:hidden}
+.loader .bar i{display:block;height:100%;width:0;background:var(--lime);transition:width .2s ease}
+.loader .pct{font-weight:800;font-size:16px;letter-spacing:.2em}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .tickets{max-width:720px}
+}
+@media (max-width:560px){
+  .sec{padding-left:14px;padding-right:14px}
+  .tickets{flex-direction:column;gap:12px}
+  .ticket{width:min(350px,92vw)}
+  .ticket .stub{width:54px}.ticket .stub svg{width:26px;height:26px}.ticket .stub b{font-size:24px}
+  .ticket .body{padding:10px 14px}
+  .ticket .k{font-size:17px}.ticket .v{font-size:27px}.ticket .s{font-size:14px}
+  .days{font-size:clamp(96px,30vw,140px)}
+  .dl{font-size:22px}
+  .tagline{font-size:17px}
+  .cta{font-size:clamp(17px,5.4vw,24px);padding:16px 14px;gap:8px;border-width:4px;white-space:normal;max-width:calc(100vw - 52px);text-align:center}
+  .cta-wrap{padding:10px 12px}.ring.r2{inset:5px 7px}.ring.pulse{inset:10px 12px}
+  .dots{right:2px}.dots span{display:none}.dots button{padding:5px 4px}.dots i{width:9px;height:9px;border-width:2px}.dots button.on i{height:20px}
+  .cue .mouse{width:22px;height:36px}
+}
+@media (max-height:640px) and (min-width:561px){
+  .logo{max-height:24vh}.days{font-size:clamp(90px,22vh,170px)}.ticket .v{font-size:26px}.cue .mouse{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .rv,.sec.on .rv{transition:opacity .4s ease!important}
+  .rv{transform:rotate(var(--r,0deg))!important}
+  .ring.pulse,.cue .wheel,.cue .chev,.cta .arr,.floaty,.loader img{animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader" role="status" aria-live="polite">
+  <img src="logo.png" alt="">
+  <div class="bar"><i id="bar"></i></div>
+  <div class="pct" id="pct">LOADING 0%</div>
+</div>
+
+<nav class="dots" id="dots" aria-label="Sections">
+  <button data-go="s1" aria-label="Go to Invitation"><span>INVITE</span><i></i></button>
+  <button data-go="s2" aria-label="Go to Save the Date"><span>SAVE THE DATE</span><i></i></button>
+  <button data-go="s3" aria-label="Go to RSVP"><span>RSVP</span><i></i></button>
+</nav>
+
+<div class="track" id="track">
+  <div class="snap a" aria-hidden="true"></div><div class="snap b" aria-hidden="true"></div><div class="snap c" aria-hidden="true"></div>
+  <div class="stage calm" id="stage">
+    <canvas id="bg" aria-hidden="true"></canvas>
+    <div class="shade top" aria-hidden="true"></div>
+    <div class="shade bot" aria-hidden="true"></div>
+
+    <!-- ===== SECTION 1 ===== -->
+    <section class="sec s1" id="s1" aria-label="Invitation">
+      <div class="grp">
+        <h1 class="stroke h1 rv punch" style="--i:0">You are Invited!</h1>
+        <div class="floaty"><img class="logo rv" style="--i:1" src="logo.png" alt="3D Picklers — Dink. Drink. Dine." width="1200" height="679"></div>
+        <p class="stroke yep rv punch" style="--i:2">Year-End Party</p>
+      </div>
+      <div class="spacer"></div>
+      <div class="grp">
+        <div class="tagline rv slap" style="--i:4">Drink. Dine &amp; Double the Fun!</div>
+        <button class="cue rv" style="--i:5" data-go="s2" aria-label="Scroll down to Save the Date">
+          <span>SCROLL DOWN</span>
+          <svg class="mouse" viewBox="0 0 28 44" fill="none" aria-hidden="true"><path d="M26 14a12 12 0 0 0-24 0v16a12 12 0 0 0 24 0z" stroke="#B8F53C" stroke-width="2.5"/><rect class="wheel" x="12" y="9" width="4" height="9" rx="2" fill="#B8F53C"/></svg>
+          <svg class="chev" viewBox="0 0 26 26" fill="none" stroke="#B8F53C" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5L13 13l6.5-6.5"/><path d="M6.5 14l6.5 6.5L19.5 14" opacity=".5"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2 ===== -->
+    <section class="sec s2" id="s2" aria-label="Save the Date" inert>
+      <div class="grp">
+        <h2 class="stroke h2 rv punch" style="--i:0">Save the Date</h2>
+        <div class="days rv" style="--i:1" id="days">--</div>
+        <div class="dl rv slap" style="--i:2" id="daysLabel">DAYS LEFT</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="grp">
+        <div class="tickets">
+          <div class="ticket t1 rv slap" style="--i:3">
+            <div class="stub"><svg viewBox="0 0 24 24" fill="none" stroke="#0F1633" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><b>01</b></div>
+            <div class="body"><span class="k">WHEN</span><span class="v">December 12, 2026</span><span class="s">Saturday</span></div>
+          </div>
+          <div class="ticket t2 rv slap" style="--i:4">
+            <div class="stub"><svg viewBox="0 0 24 24" fill="none" stroke="#0F1633" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5V12l4 2"/></svg><b>02</b></div>
+            <div class="body"><span class="k">TIME</span><span class="v">4:30 PM</span><span class="s">Be there early!</span></div>
+          </div>
+          <div class="ticket t3 rv slap" style="--i:5">
+            <div class="stub"><svg viewBox="0 0 24 24" fill="none" stroke="#0F1633" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><b>03</b></div>
+            <div class="body"><span class="k">WHERE</span><span class="v">The Farm</span><span class="s">Greenridge, Binangonan Rizal</span></div>
+          </div>
+        </div>
+        <button class="cue rv" style="--i:7" data-go="s3" aria-label="Scroll down to RSVP">
+          <span>SCROLL DOWN</span>
+          <svg class="mouse" viewBox="0 0 28 44" fill="none" aria-hidden="true"><path d="M26 14a12 12 0 0 0-24 0v16a12 12 0 0 0 24 0z" stroke="#B8F53C" stroke-width="2.5"/><rect class="wheel" x="12" y="9" width="4" height="9" rx="2" fill="#B8F53C"/></svg>
+          <svg class="chev" viewBox="0 0 26 26" fill="none" stroke="#B8F53C" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5L13 13l6.5-6.5"/><path d="M6.5 14l6.5 6.5L19.5 14" opacity=".5"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 3 ===== -->
+    <section class="sec s3" id="s3" aria-label="RSVP" inert>
+      <div class="grp">
+        <h2 class="stroke h2 rv punch" style="--i:0">RSVP Now!</h2>
+      </div>
+      <div class="spacer"></div>
+      <div class="grp" style="margin-bottom:clamp(8px,4vh,48px)">
+        <div class="cta-wrap rv cta-in" style="--i:2">
+          <span class="ring r1" aria-hidden="true"></span>
+          <span class="ring r2" aria-hidden="true"></span>
+          <span class="ring pulse" aria-hidden="true"></span>
+          <a class="cta" href="https://docs.google.com/forms/d/e/1FAIpQLSccTX1g5gyU1a-mL3ERMY5K9oeBLMor6Fi3xpAsv8lWDP2S1g/viewform?usp=dialog" target="_blank" rel="noopener">
+            <svg class="pad" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M10.2 7.4 8.56 8.55c-4.07 2.85-5.06 8.47-2.21 12.54l4.59 6.55c2.85 4.07 8.46 5.06 12.53 2.21l1.64-1.15c4.07-2.85 5.06-8.46 2.21-12.53L22.74 9.62C19.88 5.54 14.27 4.55 10.2 7.4z" fill="#0F1633"/><path d="M24.13 28.17l-.82.57a2.5 2.5 0 0 0-.61 3.48l5.73 8.2a2.5 2.5 0 0 0 3.48.6l.82-.57a2.5 2.5 0 0 0 .61-3.48l-5.73-8.2a2.5 2.5 0 0 0-3.48-.6z" fill="#0F1633"/><circle cx="38" cy="10" r="6.5" fill="#fff" stroke="#0F1633" stroke-width="2.5"/><circle cx="36" cy="8.5" r="1.2" fill="#0F1633"/><circle cx="40" cy="9" r="1.2" fill="#0F1633"/><circle cx="38" cy="12.5" r="1.2" fill="#0F1633"/></svg>
+            Tap to Confirm Your Seat
+            <svg class="arr" viewBox="0 0 34 34" fill="none" stroke="#0F1633" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8.5l8.5 8.5L7 25.5"/><path d="M17 8.5l8.5 8.5-8.5 8.5" opacity=".5"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ---------- config ---------- */
+  var FR = 62;                      // total frames
+  var F2 = 24;                      // Save the Date rest frame (paddle up, ball tossed)
+  var REST = { s1:0, s2:2, s3:4 };  // snap points in viewport heights (match .snap in CSS)
+  var FRAME_AT = { s1:1, s2:F2, s3:FR };
+  var PARTY = Date.parse('2026-12-12T16:30:00+08:00');
+
+  try{ history.scrollRestoration = 'manual'; }catch(e){}
+  window.scrollTo(0,0);
+
+  var stage = document.getElementById('stage');
+  var canvas = document.getElementById('bg');
+  var ctx = canvas.getContext('2d');
+  var secs = { s1:document.getElementById('s1'), s2:document.getElementById('s2'), s3:document.getElementById('s3') };
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- frames ---------- */
+  var imgs = new Array(FR + 1), loaded = 0, started = false, needDraw = true;
+  function src(i){ return 'frames/f' + ('00' + i).slice(-3) + '.jpg'; }
+  var order = [1, F2, FR];
+  for (var i = 2; i < FR; i++) if (i !== F2) order.push(i);
+  var bar = document.getElementById('bar'), pct = document.getElementById('pct');
+  function onLoad(){
+    loaded++;
+    var p = Math.round(loaded / FR * 100);
+    bar.style.width = p + '%'; pct.textContent = 'LOADING ' + p + '%';
+    needDraw = true;
+    if (!started && imgs[1] && loaded >= Math.ceil(FR * .5)) start();
+    if (loaded === FR && !started) start();
+  }
+  var q = order.slice(), active = 0;
+  function pump(){
+    while (active < 6 && q.length){
+      (function(n){
+        active++;
+        var im = new Image();
+        im.decoding = 'async';
+        im.onload = function(){ imgs[n] = im; active--; onLoad(); pump(); };
+        im.onerror = function(){ active--; onLoad(); pump(); };
+        im.src = src(n);
+      })(q.shift());
+    }
+  }
+  pump();
+
+  function start(){
+    started = true;
+    document.getElementById('loader').classList.add('done');
+    document.getElementById('dots').classList.add('show');
+  }
+
+  /* ---------- canvas drawing (cover: keeps aspect ratio, never stretched) ---------- */
+  var dpr = 1;
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(stage.clientWidth * dpr);
+    canvas.height = Math.round(stage.clientHeight * dpr);
+    needDraw = true;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function smooth(a, b, x){ var t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
+  // horizontal focus on narrow screens: follow the pickle, then make room for the ball
+  function focusX(f){ return .47 + (.51 - .47) * smooth(F2, FR, f); }
+  function nearest(n){
+    if (imgs[n]) return imgs[n];
+    for (var d = 1; d < FR; d++){
+      if (n - d >= 1 && imgs[n - d]) return imgs[n - d];
+      if (n + d <= FR && imgs[n + d]) return imgs[n + d];
+    }
+    return null;
+  }
+  function drawImg(im, fx, alpha){
+    var iw = im.naturalWidth, ih = im.naturalHeight;
+    var s = Math.max(canvas.width / iw, canvas.height / ih);
+    var dw = iw * s, dh = ih * s;
+    var dx = Math.min(0, Math.max(canvas.width - dw, canvas.width / 2 - fx * dw));
+    var dy = Math.min(0, Math.max(canvas.height - dh, canvas.height * .6 - .6 * dh));
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(im, dx, dy, dw, dh);
+  }
+  function draw(f){
+    var a = Math.floor(f), t = f - a;
+    var A = nearest(Math.max(1, a)); if (!A) return;
+    var fx = focusX(f);
+    drawImg(A, fx, 1);
+    if (t > .02 && a + 1 <= FR && imgs[a + 1]) drawImg(imgs[a + 1], fx, t);
+    ctx.globalAlpha = 1;
+  }
+
+  /* ---------- scroll → frame ---------- */
+  function prog(){ return window.scrollY / (stage.clientHeight || window.innerHeight); }
+  function frameFor(p){
+    if (p <= REST.s2) return 1 + (F2 - 1) * Math.max(0, p) / REST.s2;
+    return F2 + (FR - F2) * Math.min(1, (p - REST.s2) / (REST.s3 - REST.s2));
+  }
+
+  /* ---------- sections: background first, then the content ---------- */
+  var onId = null;
+  function setOn(id){
+    if (onId === id) return;
+    onId = id;
+    for (var k in secs){
+      var on = k === id;
+      secs[k].classList.toggle('on', on);
+      if (on) secs[k].removeAttribute('inert'); else secs[k].setAttribute('inert', '');
+      secs[k].setAttribute('aria-hidden', on ? 'false' : 'true');
+    }
+    stage.classList.toggle('calm', !id);
+    if (id === 's2') countUp();
+  }
+  function dotsFor(p){
+    var id = p < 1 ? 's1' : p < 3 ? 's2' : 's3';
+    document.querySelectorAll('#dots button').forEach(function(b){
+      var on = b.getAttribute('data-go') === id;
+      b.classList.toggle('on', on); b.setAttribute('aria-current', on ? 'step' : 'false');
+    });
+  }
+  // content shows only when the scroll has settled on a section AND its animation has finished
+  function sectionFor(p, f){
+    for (var k in REST){
+      if (Math.abs(p - REST[k]) < .1 && Math.abs(f - FRAME_AT[k]) < .6) return k;
+    }
+    return null;
+  }
+
+  var cur = 1, lastDrawn = -1;
+  function tick(){
+    var p = prog();
+    var target = frameFor(p);
+    cur += (target - cur) * (reduce ? 1 : .085);   // eased playback so the animation is always seen
+    if (Math.abs(target - cur) < .01) cur = target;
+    if (needDraw || Math.abs(cur - lastDrawn) > .001){ draw(cur); lastDrawn = cur; needDraw = false; }
+    if (started){ setOn(sectionFor(p, cur)); dotsFor(p); }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  /* ---------- never skip Save the Date on a fast flick ---------- */
+  var prevP = 0, lockUntil = 0, gliding = false;
+  window.addEventListener('scroll', function(){
+    var p = prog(), now = performance.now(), r = REST.s2, eps = .015;
+    if (gliding){ prevP = p; return; }
+    if (now < lockUntil){ if (Math.abs(p - r) > eps) window.scrollTo(0, r * stage.clientHeight); prevP = r; return; }
+    if ((prevP < r - eps && p > r + eps) || (prevP > r + eps && p < r - eps)){
+      lockUntil = now + 650;
+      window.scrollTo(0, r * stage.clientHeight); prevP = r; return;
+    }
+    prevP = p;
+  }, { passive:true });
+
+  /* ---------- live countdown ---------- */
+  var daysEl = document.getElementById('days'), labelEl = document.getElementById('daysLabel'), counting = false;
+  function daysLeft(){ return Math.max(0, Math.ceil((PARTY - Date.now()) / 86400000)); }
+  function label(n){
+    if (PARTY - Date.now() <= 0){ labelEl.textContent = "IT'S PARTY TIME!"; return; }
+    labelEl.textContent = n === 1 ? 'DAY LEFT' : 'DAYS LEFT';
+  }
+  function countUp(){
+    var n = daysLeft(); label(n);
+    if (reduce){ daysEl.textContent = n; return; }
+    var t0 = performance.now() + 120, dur = 800; counting = true;
+    (function step(now){
+      var t = Math.min(1, Math.max(0, (now - t0) / dur));
+      daysEl.textContent = Math.round(n * (1 - Math.pow(1 - t, 3)));
+      if (t < 1) requestAnimationFrame(step); else counting = false;
+    })(performance.now());
+  }
+  daysEl.textContent = daysLeft(); label(daysLeft());
+  setInterval(function(){ if (!counting){ var n = daysLeft(); daysEl.textContent = n; label(n); } }, 30000);
+
+  /* ---------- scroll cue / dots: glide so the background animation plays ---------- */
+  var glideId = 0, root = document.documentElement;
+  function glide(toP){
+    var y0 = window.scrollY, y1 = toP * stage.clientHeight, dist = Math.abs(y1 - y0) / stage.clientHeight;
+    var dur = reduce ? 0 : Math.min(3200, 800 + dist * 900), t0 = performance.now(), id = ++glideId;
+    if (!dur){ window.scrollTo(0, y1); return; }
+    root.classList.add('free'); gliding = true;
+    (function step(now){
+      if (id !== glideId){ root.classList.remove('free'); gliding = false; return; }
+      var t = Math.min(1, (now - t0) / dur);
+      var e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      window.scrollTo(0, y0 + (y1 - y0) * e);
+      if (t < 1) requestAnimationFrame(step); else { root.classList.remove('free'); gliding = false; }
+    })(t0);
+  }
+  ['wheel','touchstart','keydown','mousedown'].forEach(function(ev){
+    window.addEventListener(ev, function(){ glideId++; }, { passive:true });
+  });
+  document.querySelectorAll('[data-go]').forEach(function(b){
+    b.addEventListener('click', function(e){
+      e.stopPropagation();
+      var go = b.getAttribute('data-go');
+      setTimeout(function(){ glide(REST[go]); }, 0);
+    });
+  });
+})();
+</script>
+</body>
+</html>
