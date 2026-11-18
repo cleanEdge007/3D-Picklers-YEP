@@ -445,9 +445,11 @@ html.locked,html.locked body{overflow:hidden}
   }
   // content shows only when the scroll has settled on a section AND its animation has finished
   function sectionFor(p, f){
-    for (var k in REST){
-      if (Math.abs(p - REST[k]) < .1 && Math.abs(f - FRAME_AT[k]) < .6) return k;
-    }
+    // Invite & RSVP: background animation first, then the content
+    if (Math.abs(p - REST.s1) < .1 && Math.abs(f - FRAME_AT.s1) < .6) return 's1';
+    if (Math.abs(p - REST.s3) < .1 && Math.abs(f - FRAME_AT.s3) < .6) return 's3';
+    // Save the Date: content comes in together with the background animation
+    if (p > REST.s1 + .1 && p < REST.s2 + .15) return 's2';
     return null;
   }
 
