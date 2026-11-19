@@ -480,9 +480,14 @@ html.locked,html.locked body{overflow:hidden}
 
   /* ---------- live countdown ---------- */
   var daysEl = document.getElementById('days'), labelEl = document.getElementById('daysLabel'), counting = false;
-  function daysLeft(){ return Math.max(0, Math.ceil((PARTY - Date.now()) / 86400000)); }
+  // calendar days until Dec 12 in Philippine time (UTC+8); changes at midnight PH time
+  function daysLeft(){
+    var ph = new Date(Date.now() + 8 * 3600000);
+    var today = Date.UTC(ph.getUTCFullYear(), ph.getUTCMonth(), ph.getUTCDate());
+    return Math.max(0, Math.round((Date.UTC(2026, 11, 12) - today) / 86400000));
+  }
   function label(n){
-    if (PARTY - Date.now() <= 0){ labelEl.textContent = "IT'S PARTY TIME!"; return; }
+    if (n === 0){ labelEl.textContent = "IT'S PARTY DAY!"; return; }
     labelEl.textContent = n === 1 ? 'DAY LEFT' : 'DAYS LEFT';
   }
   function countUp(){
